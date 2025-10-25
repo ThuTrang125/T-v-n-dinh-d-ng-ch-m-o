@@ -1,0 +1,5 @@
+{
+  "name": "Ecopets AI Veterinary Assistant",
+  "description": "An AI-powered assistant to provide expert advice on pet health, behavior, and recommend suitable Ecopets products based on user queries.",
+  "requestFramePermissions": []
+}
