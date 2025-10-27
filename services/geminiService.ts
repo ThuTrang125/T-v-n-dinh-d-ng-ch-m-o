@@ -1,65 +1,85 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from '@google/genai';
 import { SYSTEM_PROMPT } from '../constants';
-import type { AdviceResponse, UploadedImage } from '../types';
+import { AdviceResponse, PetFormData, UploadedImage } from '../types';
 
-export async function getPetAdvice(userInput: string, images: UploadedImage[]): Promise<AdviceResponse> {
-  if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
-  }
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
+const productRecommendationSchema = {
+  type: Type.OBJECT,
+  properties: {
+    name: { type: Type.STRING },
+    reason: { type: Type.STRING },
+    quantity: { type: Type.NUMBER },
+    price: { type: Type.NUMBER },
+  },
+  required: ['name', 'reason', 'quantity', 'price'],
+};
+
+const adviceResponseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    visualAnalysis: { type: Type.STRING },
+    nutritionHypothesis: { type: Type.STRING },
+    nutritionAdvice: { type: Type.STRING },
+    habitAdvice: { type: Type.STRING },
+    warnings: { type: Type.STRING },
+    connectionAdvice: { type: Type.STRING },
+    productRecommendations: {
+      type: Type.ARRAY,
+      items: productRecommendationSchema,
+    },
+  },
+  required: [
+    'visualAnalysis',
+    'nutritionHypothesis',
+    'nutritionAdvice',
+    'habitAdvice',
+    'warnings',
+    'connectionAdvice',
+    'productRecommendations',
+  ],
+};
+
+export const getPetAdvice = async (
+  userInput: string,
+  images: UploadedImage[]
+): Promise<AdviceResponse> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-    const fullPrompt = `${SYSTEM_PROMPT}\n\n[INPUT]:\n${userInput}`;
-
-    const promptParts: any[] = [{ text: fullPrompt }];
-    for (const image of images) {
-        promptParts.push({
-            inlineData: {
-                mimeType: image.type,
-                data: image.base64,
-            }
-        });
-    }
+    const contents: any[] = [{ text: userInput }];
+    images.forEach(image => {
+      contents.push({
+        inlineData: {
+          mimeType: 'image/jpeg',
+          data: image.base64,
+        },
+      });
+    });
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: { parts: promptParts },
-        config: {
-            responseMimeType: "application/json",
-            temperature: 0.2,
-        }
+      model: 'gemini-2.5-flash',
+      contents: { parts: contents },
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        responseMimeType: 'application/json',
+        responseSchema: adviceResponseSchema,
+      },
     });
-    
-    const rawText = response.text.trim();
-    
-    // Sanitize the response to handle potential malformations from the AI
-    // 1. Remove markdown fences that the model might wrap the JSON in.
-    let sanitizedText = rawText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    
-    // 2. Replace the custom newline token '[NL]' with the correctly escaped newline for JSON parsing.
-    sanitizedText = sanitizedText.replace(/\[NL\]/g, '\\n');
 
-    try {
-        const advice: AdviceResponse = JSON.parse(sanitizedText);
-        return advice;
-    } catch (parseError) {
-        console.error("Failed to parse sanitized JSON:", sanitizedText);
-        console.error("Original raw text from AI:", rawText);
-        console.error("JSON Parse Error:", parseError);
-        throw new Error("AI response was not in the expected JSON format, even after sanitization. Please try again.");
+    let text = response.text.trim();
+    
+    // Clean potential markdown
+    if (text.startsWith('```json')) {
+      text = text.slice(7, -3).trim();
     }
+
+    // The component layer will handle the [NL] tag for display.
+    // text = text.replace(/\[NL\]/g, '\\n');
+
+    const advice: AdviceResponse = JSON.parse(text);
+    return advice;
 
   } catch (error) {
-    console.error("Error calling Gemini API:", error);
-    if (error instanceof SyntaxError) {
-      // This happens if Gemini doesn't return valid JSON
-      throw new Error("AI response was not in the expected format. Please try rephrasing your question.");
-    }
-    const errorMessage = (error as any)?.message || "An unexpected error occurred.";
-    if (errorMessage.includes("400 Bad Request")) {
-       throw new Error("The AI model couldn't process the request. This might be due to the images provided. Please try with different or clearer images.");
-    }
-    throw new Error("An unexpected error occurred while getting advice. Please try again later.");
+    console.error('Error calling Gemini API:', error);
+    throw new Error('Không thể nhận tư vấn từ AI. Vui lòng thử lại sau.');
   }
-}
+};

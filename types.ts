@@ -1,62 +1,55 @@
-export interface ProductRecommendation {
-  name: string;
-  reason: string;
-  usp: string;
-  usage: string;
-}
-
-export interface AdviceResponse {
-  isEmergency: boolean;
-  emergencyMessage: string | null;
-  analysis: string | null;
-  professionalAdvice: {
-    nutrition: string;
-    behavior: string;
-  } | null;
-  notes: {
-    warnings: string;
-    donts: string;
-    disclaimer: string;
-  } | null;
-  productRecommendations: ProductRecommendation[] | null;
-}
-
 export interface PetFormData {
-  // Section 1
-  petType: 'Chó' | 'Mèo' | '';
+  userName: string;
+  userPhone: string;
+  userAddress: string;
+  petName: string;
+  species: 'dog' | 'cat' | '';
   breed: string;
   age: string;
-  gender: 'Đực (Chưa triệt sản)' | 'Đực (Đã triệt sản)' | 'Cái (Chưa triệt sản)' | 'Cái (Đã triệt sản)' | '';
+  gender: '' | 'male_neutered' | 'male_intact' | 'female_neutered' | 'female_intact';
   weight: string;
-  // Section 2
   mainIssues: string[];
   symptoms: string;
-  onset: string;
-  frequency: string;
+  symptomDuration: string;
+  symptomFrequency: string;
   priorTreatment: string;
-  // Section 4
-  energyLevel: 'Bình thường' | 'Tăng động' | 'Lừ đừ, mệt mỏi' | '';
-  appetite: 'Bình thường' | 'Ăn ít, biếng ăn' | 'Ăn nhiều hơn' | '';
-  vomiting: 'Không' | 'Có - Thức ăn' | 'Có - Dịch vàng' | 'Có - Bọt trắng' | '';
-  stool: 'Bình thường' | 'Táo bón' | 'Tiêu chảy' | '';
-  stoolDescription: string;
-  urination: 'Bình thường' | 'Tiểu khó, rặn tiểu' | 'Tiểu nhiều lần' | 'Nước tiểu có màu lạ' | '';
-  drinking: 'Bình thường' | 'Uống nhiều hơn' | 'Uống ít hơn' | '';
-  breathing: 'Bình thường' | 'Thở nhanh, gấp' | 'Khó thở, thở hóp bụng' | '';
-  coughing: 'Có' | 'Không' | '';
-  // Section 5
-  diet: string;
+  energyLevel: '' | 'normal' | 'hyperactive' | 'lethargic';
+  appetite: '' | 'normal' | 'decreased' | 'increased';
+  vomiting: '' | 'no' | 'food' | 'yellow_liquid' | 'white_foam';
+  stool: '' | 'normal' | 'constipation' | 'diarrhea';
+  stoolDetails: string;
+  drinking: '' | 'normal' | 'increased' | 'decreased';
+  urination: '' | 'normal' | 'straining' | 'frequent' | 'discolored';
+  breathing: '' | 'normal' | 'fast' | 'labored';
+  coughingSneezing: 'no' | 'yes';
+  currentDiet: string;
   supplements: string;
-  environment: 'Trong nhà' | 'Ngoài trời' | 'Cả hai' | '';
-  waterSource: 'Nước máy' | 'Nước đun sôi' | 'Nước bình' | '';
-  contactWithPets: 'Có' | 'Không' | '';
-  deworming: string;
-  vaccination: 'Đã tiêm đủ' | 'Chưa tiêm' | 'Không nhớ' | '';
+  environment: '' | 'indoor' | 'outdoor' | 'both';
+  waterSource: '' | 'tap' | 'boiled' | 'bottled';
+  contactWithPets: 'no' | 'yes';
+  deworming: '' | 'monthly' | 'gt_6_months' | 'unknown';
+  vaccination: '' | 'full' | 'partial' | 'unknown';
   allergies: string;
 }
 
 export interface UploadedImage {
-    name: string;
-    type: string;
-    base64: string;
+  name: string;
+  base64: string;
+}
+
+export interface ProductRecommendation {
+  name: string;
+  reason: string;
+  quantity: number;
+  price: number;
+}
+
+export interface AdviceResponse {
+  visualAnalysis: string;
+  nutritionHypothesis: string;
+  nutritionAdvice: string;
+  habitAdvice: string;
+  warnings: string;
+  connectionAdvice: string;
+  productRecommendations: ProductRecommendation[];
 }

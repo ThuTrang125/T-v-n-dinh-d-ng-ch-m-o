@@ -1,84 +1,124 @@
 import React from 'react';
-import type { AdviceResponse } from '../types';
+import { AdviceResponse } from '../types';
 
 interface AdviceCardProps {
   advice: AdviceResponse;
+  onPurchase: () => void;
+  onReset: () => void;
+  purchaseStatus: 'idle' | 'pending' | 'success' | 'error';
 }
 
-const AdviceSection: React.FC<{ title: string; children: React.ReactNode; icon: string }> = ({ title, children, icon }) => (
-  <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-primary">
-    <div className="flex items-center mb-3">
-      <span className="text-2xl mr-3 text-primary">{icon}</span>
-      <h3 className="text-xl font-bold text-gray-800">{title}</h3>
-    </div>
-    <div className="text-text-secondary space-y-2">{children}</div>
-  </div>
-);
+export const AdviceCard: React.FC<AdviceCardProps> = ({ advice, onPurchase, onReset, purchaseStatus }) => {
+  const totalCost = advice.productRecommendations.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-const AdviceCard: React.FC<AdviceCardProps> = ({ advice }) => {
-  if (advice.isEmergency) {
-    return (
-      <div className="mt-6 p-6 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-lg shadow-lg animate-fade-in">
-        <div className="flex items-center">
-          <svg className="w-8 h-8 mr-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-          <div>
-            <p className="font-bold text-lg">CẢNH BÁO KHẨN CẤP!</p>
-            <p>{advice.emergencyMessage}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const formatTextForDisplay = (text: string) => {
+    if (!text) return null;
+    return text.split('[NL]').map((line, index, arr) => (
+      <React.Fragment key={index}>
+        {line}
+        {index < arr.length - 1 && <br />}
+      </React.Fragment>
+    ));
+  };
 
   return (
-    <div className="mt-6 space-y-6 animate-fade-in">
-      {advice.analysis && (
-        <AdviceSection title="Phân tích Sơ bộ" icon="🧐">
-          <p className="whitespace-pre-wrap">{advice.analysis}</p>
-        </AdviceSection>
-      )}
+    <div className="bg-white shadow-lg rounded-lg p-6 md:p-8 my-8 max-w-4xl mx-auto animate-fade-in">
+      <h2 className="text-3xl font-bold text-center text-emerald-700 mb-8">Kết Quả Tư Vấn từ Trợ lý AI</h2>
 
-      {advice.professionalAdvice && (
-        <AdviceSection title="Tư vấn Chuyên môn" icon="🩺">
-          <div>
-            <h4 className="font-semibold text-gray-700 mb-1">Về Dinh dưỡng:</h4>
-            <p className="whitespace-pre-wrap">{advice.professionalAdvice.nutrition}</p>
+      <div className="space-y-8">
+        {advice.visualAnalysis && (
+          <div className="p-4 border-t-4 border-emerald-500 rounded-b-lg bg-slate-50 shadow-sm">
+            <h3 className="text-xl font-semibold text-emerald-800 mb-2">1. Phân tích Ngoại quan (Từ hình ảnh)</h3>
+            <p className="text-slate-700">{formatTextForDisplay(advice.visualAnalysis)}</p>
           </div>
-          <div className="mt-4">
-            <h4 className="font-semibold text-gray-700 mb-1">Về Thói quen & Môi trường:</h4>
-            <p className="whitespace-pre-wrap">{advice.professionalAdvice.behavior}</p>
-          </div>
-        </AdviceSection>
-      )}
-
-      {advice.productRecommendations && advice.productRecommendations.length > 0 && (
-        <AdviceSection title="Sản phẩm Ecopets Đề xuất" icon="🌿">
-          {advice.productRecommendations.map((rec, index) => (
-            <div key={index} className="p-4 bg-primary-light/30 rounded-md border border-primary-light mt-2">
-              <h4 className="font-bold text-primary-dark">{rec.name}</h4>
-              <p className="mt-1 whitespace-pre-wrap"><span className="font-semibold">Lý do:</span> {rec.reason}</p>
-              <p className="mt-1 whitespace-pre-wrap"><span className="font-semibold">Điểm nổi bật (USP):</span> {rec.usp}</p>
-              <p className="mt-1 whitespace-pre-wrap"><span className="font-semibold">Cách dùng:</span> {rec.usage}</p>
+        )}
+        
+        <div className="p-4 border-t-4 border-emerald-500 rounded-b-lg bg-slate-50 shadow-sm">
+            <h3 className="text-xl font-semibold text-emerald-800 mb-3">2. Chẩn đoán sơ bộ & Tư vấn</h3>
+            <div className="space-y-4">
+                <div>
+                    <h4 className="font-semibold text-slate-800">Giả thuyết về Dinh dưỡng:</h4>
+                    <p className="text-slate-700">{formatTextForDisplay(advice.nutritionHypothesis)}</p>
+                </div>
+                <div>
+                    <h4 className="font-semibold text-slate-800">Kế hoạch hành động (Dinh dưỡng):</h4>
+                    <p className="text-slate-700">{formatTextForDisplay(advice.nutritionAdvice)}</p>
+                </div>
+                 <div>
+                    <h4 className="font-semibold text-slate-800">Tư vấn Thói quen & Môi trường:</h4>
+                    <p className="text-slate-700">{formatTextForDisplay(advice.habitAdvice)}</p>
+                </div>
             </div>
-          ))}
-        </AdviceSection>
-      )}
-
-      {advice.notes && (
-        <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-lg shadow-md">
-          <h3 className="font-bold text-lg flex items-center mb-2">
-            <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8.257 3.099c.636-1.21 2.273-1.21 2.91 0l5.396 10.27c.636 1.21-.24 2.631-1.455 2.631H4.316c-1.215 0-2.091-1.421-1.455-2.631L8.257 3.099zM9 13a1 1 0 112 0 1 1 0 01-2 0zm1-5a1 1 0 00-1 1v3a1 1 0 102 0V9a1 1 0 00-1-1z" clipRule="evenodd"></path></svg>
-            Những điều cần Lưu ý
-          </h3>
-          <ul className="list-disc list-inside space-y-2 text-sm">
-            {advice.notes.warnings && <li className="whitespace-pre-wrap"><span className="font-semibold">Theo dõi thêm:</span> {advice.notes.warnings}</li>}
-            {advice.notes.donts && <li className="whitespace-pre-wrap"><span className="font-semibold">Không nên làm:</span> {advice.notes.donts}</li>}
-            <li className="font-bold mt-3">{advice.notes.disclaimer}</li>
-          </ul>
         </div>
-      )}
+
+        {advice.connectionAdvice && (
+            <div className="p-4 border-t-4 border-indigo-400 rounded-b-lg bg-indigo-50 shadow-sm">
+                <h3 className="text-xl font-semibold text-indigo-800 mb-2">3. Góc nhìn Thần số học: Kết nối Chủ & Bé</h3>
+                <p className="text-indigo-700">{formatTextForDisplay(advice.connectionAdvice)}</p>
+            </div>
+        )}
+        
+        <div className="p-4 border-t-4 border-amber-400 rounded-b-lg bg-amber-50 shadow-sm">
+          <h3 className="text-xl font-semibold text-amber-800 mb-2">4. Cảnh Báo Quan Trọng</h3>
+          <p className="text-amber-700">{formatTextForDisplay(advice.warnings)}</p>
+        </div>
+
+        <div className="p-4 border-t-4 border-emerald-500 rounded-b-lg bg-slate-50 shadow-sm">
+          <h3 className="text-xl font-semibold text-emerald-800 mb-3">5. Gói Sản Phẩm Ecopets Đề Xuất</h3>
+          {advice.productRecommendations && advice.productRecommendations.length > 0 ? (
+             <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border rounded-lg">
+                    <thead className="bg-slate-100">
+                        <tr>
+                            <th className="py-2 px-4 border-b text-left font-semibold text-slate-600">Sản phẩm</th>
+                            <th className="py-2 px-4 border-b text-left font-semibold text-slate-600">Lý do</th>
+                            <th className="py-2 px-4 border-b text-center font-semibold text-slate-600">SL</th>
+                            <th className="py-2 px-4 border-b text-right font-semibold text-slate-600">Đơn giá</th>
+                            <th className="py-2 px-4 border-b text-right font-semibold text-slate-600">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {advice.productRecommendations.map((item, index) => (
+                        <tr key={index} className="hover:bg-slate-50">
+                            <td className="py-2 px-4 border-b font-medium text-slate-800">{item.name}</td>
+                            <td className="py-2 px-4 border-b text-sm text-slate-600">{item.reason}</td>
+                            <td className="py-2 px-4 border-b text-center text-slate-600">{item.quantity}</td>
+                            <td className="py-2 px-4 border-b text-right text-slate-600">{item.price.toLocaleString('vi-VN')}đ</td>
+                            <td className="py-2 px-4 border-b text-right font-semibold text-slate-800">{(item.price * item.quantity).toLocaleString('vi-VN')}đ</td>
+                        </tr>
+                        ))}
+                    </tbody>
+                    <tfoot>
+                        <tr className="bg-slate-100 font-bold">
+                            <td colSpan={4} className="py-3 px-4 text-right text-lg text-emerald-800">Tổng cộng</td>
+                            <td className="py-3 px-4 text-right text-lg text-emerald-800">{totalCost.toLocaleString('vi-VN')}đ</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <p className="text-center text-sm text-emerald-600 mt-2 font-semibold">Freeship cho đơn hàng từ 100,000đ</p>
+            </div>
+          ) : <p>Không có sản phẩm nào được đề xuất dựa trên tình trạng hiện tại.</p>}
+        </div>
+      </div>
+      
+      <div className="mt-8 text-center space-y-4 md:space-y-0 md:space-x-4">
+        {advice.productRecommendations && advice.productRecommendations.length > 0 && (
+             <button
+                onClick={onPurchase}
+                disabled={purchaseStatus === 'pending' || purchaseStatus === 'success'}
+                className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 disabled:bg-slate-400 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                {purchaseStatus === 'pending' ? 'Đang gửi yêu cầu...' : (purchaseStatus === 'success' ? 'Yêu cầu đã được gửi!' : 'Đặt Mua Ngay Gói Sản Phẩm Này')}
+            </button>
+        )}
+        <button
+          onClick={onReset}
+          disabled={purchaseStatus === 'pending'}
+          className="w-full md:w-auto bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 disabled:bg-slate-400"
+        >
+          Tư vấn cho bé khác
+        </button>
+      </div>
     </div>
   );
 };
-
-export default AdviceCard;

@@ -1,42 +1,23 @@
-
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ecopets AI Veterinary Assistant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: '#4CAF50',
-              'primary-dark': '#388E3C',
-              'primary-light': '#C8E6C9',
-              accent: '#8BC34A',
-              text: '#212121',
-              'text-secondary': '#757575',
-              background: '#F5F5F5',
-              surface: '#FFFFFF',
-            },
-          },
-        },
-      }
-    </script>
-  <script type="importmap">
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trợ Lý Thú Y AI Ecopets</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+<script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0"
   }
 }
 </script>
 </head>
-  <body class="bg-background">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+<body class="bg-slate-50">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
 </html>
