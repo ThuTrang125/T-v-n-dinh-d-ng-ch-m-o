@@ -5,11 +5,14 @@ interface AdviceCardProps {
   advice: AdviceResponse;
   onPurchase: () => void;
   onReset: () => void;
+  onLearnMore: () => void;
   purchaseStatus: 'idle' | 'pending' | 'success' | 'error';
 }
 
-export const AdviceCard: React.FC<AdviceCardProps> = ({ advice, onPurchase, onReset, purchaseStatus }) => {
+export const AdviceCard: React.FC<AdviceCardProps> = ({ advice, onPurchase, onReset, onLearnMore, purchaseStatus }) => {
   const totalCost = advice.productRecommendations.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const discount = totalCost * 0.2;
+  const finalCost = totalCost - discount;
 
   const formatTextForDisplay = (text: string) => {
     if (!text) return null;
@@ -89,32 +92,53 @@ export const AdviceCard: React.FC<AdviceCardProps> = ({ advice, onPurchase, onRe
                         ))}
                     </tbody>
                     <tfoot>
+                        <tr className="font-medium">
+                            <td colSpan={4} className="py-2 px-4 text-right text-slate-700 border-t">Tổng cộng</td>
+                            <td className="py-2 px-4 text-right text-slate-800 border-t">{totalCost.toLocaleString('vi-VN')}đ</td>
+                        </tr>
+                        <tr className="font-medium">
+                            <td colSpan={4} className="py-2 px-4 text-right text-slate-700">Phí vận chuyển</td>
+                            <td className="py-2 px-4 text-right text-emerald-600 font-semibold">Free ship</td>
+                        </tr>
+                        <tr className="font-medium">
+                            <td colSpan={4} className="py-2 px-4 text-right text-slate-700">Giảm giá (20%)</td>
+                            <td className="py-2 px-4 text-right text-red-600 font-semibold">- {discount.toLocaleString('vi-VN')}đ</td>
+                        </tr>
                         <tr className="bg-slate-100 font-bold">
-                            <td colSpan={4} className="py-3 px-4 text-right text-lg text-emerald-800">Tổng cộng</td>
-                            <td className="py-3 px-4 text-right text-lg text-emerald-800">{totalCost.toLocaleString('vi-VN')}đ</td>
+                            <td colSpan={4} className="py-3 px-4 text-right text-lg text-emerald-800">Thành tiền</td>
+                            <td className="py-3 px-4 text-right text-lg text-emerald-800">{finalCost.toLocaleString('vi-VN')}đ</td>
                         </tr>
                     </tfoot>
                 </table>
-                <p className="text-center text-sm text-emerald-600 mt-2 font-semibold">Freeship cho đơn hàng từ 100,000đ</p>
+                <p className="text-center text-sm text-emerald-600 mt-2 font-semibold">Freeship và Giảm ngay 20% khi Mua sản phẩm theo tư vấn</p>
             </div>
           ) : <p>Không có sản phẩm nào được đề xuất dựa trên tình trạng hiện tại.</p>}
         </div>
       </div>
       
-      <div className="mt-8 text-center space-y-4 md:space-y-0 md:space-x-4">
+      <div className="mt-8 text-center space-y-4 md:space-y-0 md:flex md:justify-center md:items-center md:gap-4">
         {advice.productRecommendations && advice.productRecommendations.length > 0 && (
-             <button
-                onClick={onPurchase}
-                disabled={purchaseStatus === 'pending' || purchaseStatus === 'success'}
-                className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 disabled:bg-slate-400 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            <>
+                <button
+                    onClick={onPurchase}
+                    disabled={purchaseStatus === 'pending' || purchaseStatus === 'success'}
+                    className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 disabled:bg-slate-400 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
-                {purchaseStatus === 'pending' ? 'Đang gửi yêu cầu...' : (purchaseStatus === 'success' ? 'Yêu cầu đã được gửi!' : 'Đặt Mua Ngay Gói Sản Phẩm Này')}
-            </button>
+                    {purchaseStatus === 'pending' ? 'Đang gửi yêu cầu...' : (purchaseStatus === 'success' ? 'Yêu cầu đã được gửi!' : 'Đặt Mua Ngay Gói Sản Phẩm Này')}
+                </button>
+                <button
+                    onClick={onLearnMore}
+                    disabled={purchaseStatus === 'pending'}
+                    className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 disabled:bg-slate-400 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                    Cần tìm hiểu thêm về sản phẩm
+                </button>
+            </>
         )}
         <button
           onClick={onReset}
           disabled={purchaseStatus === 'pending'}
-          className="w-full md:w-auto bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 disabled:bg-slate-400"
+          className="w-full md:w-auto bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300 disabled:bg-slate-400"
         >
           Tư vấn cho bé khác
         </button>

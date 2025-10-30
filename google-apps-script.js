@@ -34,12 +34,22 @@ function doPost(e) {
     // Extract data from the request parameters
     var data = e.parameter;
     
-    // Create the new row array in the same order as the headers
-    var newRow = headers.map(function(header) {
-      // Use the header name to get the corresponding value from the data object.
-      // Default to an empty string if a parameter is not found.
-      return data[header] || '';
-    });
+    // FIX: Correctly map the camelCase form data keys to the sheet columns.
+    // The original logic was flawed as it tried to use Vietnamese headers as keys.
+    var newRow = [
+      new Date(),               // Timestamp
+      data.type || '',          // Loại Yêu Cầu
+      data.userName || '',      // Tên Khách Hàng
+      data.userPhone || '',     // Số Điện Thoại
+      data.userAddress || '',   // Địa Chỉ
+      data.petInfo || '',       // Thông Tin Thú Cưng
+      data.aiAnalysis || '',    // Phân Tích Của AI
+      data.aiNutrition || '',   // Tư Vấn Dinh Dưỡng
+      data.aiBehavior || '',    // Tư Vấn Hành Vi
+      data.aiConnection || '',  // Tư Vấn Kết Nối
+      data.aiProducts || '',    // Sản Phẩm Đề Xuất
+      data.totalCost || ''      // Tổng Tiền
+    ];
 
     sheet.appendRow(newRow);
 
